@@ -199,6 +199,8 @@ rna.heat <- Heatmap(rld.heatmap,
 vir_up <- rownames(rld.heatmap[row_order(rna.heat)[[1]],])
 vir_down <- rownames(rld.heatmap[row_order(rna.heat)[[3]],])
 control_up <- rownames(rld.heatmap[row_order(rna.heat)[[5]],])
+vax_up <- rownames(rld.heatmap[row_order(rna.heat)[[2]],])
+
 # DATA ANALYSIS: GSEA LRT-----------------------------------------------------
 
 sig_genes_lrt.df <- result_lrt[which(result_lrt$padj < 0.1 ),]
