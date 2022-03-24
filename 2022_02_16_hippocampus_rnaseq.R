@@ -181,25 +181,34 @@ rld.heatmap <- rld[which(rownames(rld) %in% rownames(result_lrt[which(result_lrt
 rld.heatmap <- assay(rld.heatmap)
 rld.heatmap <- t(scale(t(rld.heatmap))) #scale by rows because ComplexHeatmap wont do it for us
 
+#make top annotations
 col_annotation <- HeatmapAnnotation(Group = samp_table.meta$condition,
                                     col = list(Group =c("unvaccinated_challenge" = "#0B3954",
                                                "vaccinated_challenged"  = "#087E8B",
                                                "unvaccinated_not_challenge" = "#BFD7EA") ))
 
 
-#list("unvaccinated_challenge" = "#0B3954",
-#     "vaccinated_challenged"  = "#087E8B",
-#     "unvaccinated_not_challenge" = "#BFD7EA")
-
+#make the heatmap
 rna.heat <- Heatmap(rld.heatmap,
         top_annotation = col_annotation,
         show_row_names =  F,
         show_column_names = T, row_split = 5)
 
+rna.heat6 <- Heatmap(rld.heatmap,
+                    top_annotation = col_annotation,
+                    show_row_names =  F,
+                    show_column_names = T, row_split = 6)
+
+rna.heat7 <- Heatmap(rld.heatmap,
+                     top_annotation = col_annotation,
+                     show_row_names =  F,
+                     show_column_names = T, row_split = 7)
+
 vir_up <- rownames(rld.heatmap[row_order(rna.heat)[[1]],])
 vir_down <- rownames(rld.heatmap[row_order(rna.heat)[[3]],])
 control_up <- rownames(rld.heatmap[row_order(rna.heat)[[5]],])
 vax_up <- rownames(rld.heatmap[row_order(rna.heat)[[2]],])
+
 
 # DATA ANALYSIS: GSEA LRT-----------------------------------------------------
 
@@ -954,3 +963,33 @@ control_up.meko <- enrichMKEGG(gene         = names(control_up.list),
                                organism       = 'ssc'
 
 )
+
+
+
+
+# SANDBOX 3: Mapping ensembl to entrez/hngc---------------------------------------------------------------
+
+
+ensembl <- useEnsembl(biomart = "genes", dataset = "sscrofa_gene_ensembl")
+
+temp.df <-  result_1[which(rownames(result_1) %in% vax_up),]
+temp.rnames <- rownames(temp.df)
+
+# convert the Ensembl ids to entrez and hugo
+
+temp_list <- getBM(attributes = c('ensembl_gene_id', 'entrezgene_id', 'hgnc_symbol'),
+                  filters = c("ensembl_gene_id", "with_entrezgene"),
+                  values = list(temp.rnames, TRUE),
+                  mart = ensembl)
+
+
+# SANDBOX 3: make boxplot---------------------------------------------------------------
+
+pdf("~/Desktop/boxplot.pdf")
+boxplot(as.vector(assay(rld[rownames(result_1)[1],])) ~ samp_table.meta$condition, col = "steelblue")
+dev.off()
+#ggplot ready data
+data.frame(value = as.vector(assay(rld[rownames(result_1)[1],])),
+           group = samp_table.meta$condition )
+
+
